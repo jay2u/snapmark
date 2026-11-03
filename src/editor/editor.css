@@ -1,0 +1,43 @@
+@import '../shared/base.css';
+html, body { height: 100%; overflow: hidden; }
+#app { display: flex; height: 100%; }
+#tools { width: 56px; background: var(--panel); border-right: 1px solid var(--border); padding: 8px 6px; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+#tools button { position: relative; width: 44px; height: 38px; display: grid; place-items: center; background: transparent; border: 0; border-radius: 8px; color: var(--muted); }
+#tools button:hover { background: var(--panel2); color: var(--text); }
+#tools button.active { background: var(--accent); color: #fff; }
+#tools button kbd { position: absolute; right: 3px; bottom: 1px; font: 9px ui-monospace, monospace; opacity: .6; }
+#tools hr { width: 100%; border: 0; border-top: 1px solid var(--border); margin: 4px 0; }
+svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#topbar, #options { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--panel); border-bottom: 1px solid var(--border); min-height: 46px; }
+#options { background: var(--bg); gap: 14px; flex-wrap: wrap; }
+.grow { flex: 1; }
+.sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+button.icon, button.txt, button.zoom { background: transparent; border: 0; border-radius: 6px; color: var(--text); height: 30px; min-width: 30px; padding: 0 8px; font-size: 14px; }
+button.icon:hover, button.txt:hover, button.zoom:hover { background: var(--panel2); }
+button:disabled { opacity: .35; pointer-events: none; }
+button.zoom { min-width: 52px; font-variant-numeric: tabular-nums; font-size: 12px; }
+select, input[type=range] { accent-color: var(--accent); }
+select { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 5px 6px; }
+#qualityWrap { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+#workspace { flex: 1; overflow: auto; background: #0e0f12 repeating-conic-gradient(#14161a 0% 25%, #101216 0% 50%) 0 0 / 20px 20px; position: relative; }
+#workspace.panning, #workspace.panning * { cursor: grabbing !important; }
+#stageWrap { display: grid; min-width: 100%; min-height: 100%; place-items: center; padding: 24px; width: max-content; box-sizing: border-box; }
+#stage { box-shadow: 0 6px 30px rgba(0,0,0,.55); background: #fff; line-height: 0; }
+#status { display: flex; gap: 12px; padding: 4px 12px; background: var(--panel); border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+/* option controls */
+.opt { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+.opt input[type=range] { width: 96px; }
+.opt .val { width: 26px; color: var(--text); font-variant-numeric: tabular-nums; }
+.swatches { display: flex; gap: 5px; align-items: center; }
+.swatch { width: 20px; height: 20px; border-radius: 50%; border: 2px solid transparent; outline: 1px solid var(--border); padding: 0; }
+.swatch.on { border-color: var(--bg); outline: 2px solid var(--accent); }
+input[type=color] { width: 24px; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; }
+.toggle { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; }
+.toggle.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.emojis { display: flex; gap: 2px; }
+.emojis button { background: transparent; border: 1px solid transparent; border-radius: 6px; font-size: 20px; line-height: 1; padding: 3px 4px; }
+.emojis button.on { border-color: var(--accent); background: var(--panel2); }
+.hint { color: var(--muted); font-size: 12px; }
+.pill-row { display: flex; gap: 4px; }
+#toast { position: fixed; left: 50%; bottom: 36px; transform: translateX(-50%); background: #111827; border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; box-shadow: 0 6px 24px rgba(0,0,0,.5); z-index: 100; }

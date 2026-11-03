@@ -1,0 +1,13 @@
+:root {
+  --bg: #14161a; --panel: #1d2026; --panel2: #262a32; --border: #323843;
+  --text: #e6e9ef; --muted: #8a93a3; --accent: #4f8cff; --accent-hover: #6aa0ff; --danger: #ef4444;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.btn { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.danger:hover { border-color: var(--danger); color: var(--danger); }

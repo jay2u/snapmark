@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Snapmark - History</title><link rel="stylesheet" href="./history.css"></head>
+<body>
+  <header>
+    <h1>Snapmark history</h1>
+    <span class="spacer"></span>
+    <label>Keep last <input id="max" type="number" min="1" max="1000" value="100"> captures</label>
+    <button id="clear" class="btn danger">Delete all</button>
+  </header>
+  <main id="grid"></main>
+  <p id="empty" class="empty" hidden>No captures yet. Use the toolbar button or Alt+Shift+V to take one.</p>
+  <script type="module" src="./history.ts"></script>
+</body>
+</html>

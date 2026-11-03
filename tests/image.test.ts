@@ -1,0 +1,41 @@
+import { describe, expect, it } from 'vitest';
+import { limitScale, scrollPositions } from '../src/shared/image';
+import { rectFrom, snap45 } from '../src/editor/geometry';
+
+describe('scrollPositions', () => {
+  it('covers a page exactly with the last slice clamped to the end', () => {
+    expect(scrollPositions(2500, 1000)).toEqual([0, 1000, 1500]);
+  });
+  it('uses a single slice when the page fits the viewport', () => {
+    expect(scrollPositions(800, 1000)).toEqual([0]);
+  });
+  it('has no duplicate when the page is an exact multiple', () => {
+    expect(scrollPositions(3000, 1000)).toEqual([0, 1000, 2000]);
+  });
+});
+
+describe('limitScale', () => {
+  it('leaves normal images alone', () => expect(limitScale(1920, 5000)).toBe(1));
+  it('shrinks over-tall images below the dimension cap', () => {
+    const k = limitScale(1440, 100_000);
+    expect(100_000 * k).toBeLessThanOrEqual(32000);
+  });
+  it('shrinks images over the area cap', () => {
+    const k = limitScale(30_000, 30_000);
+    expect(30_000 * 30_000 * k * k).toBeLessThanOrEqual(250_000_000 + 1);
+  });
+});
+
+describe('geometry', () => {
+  it('normalises a rectangle dragged up and to the left', () => {
+    expect(rectFrom({ x: 50, y: 50 }, { x: 10, y: 20 })).toEqual({ x: 10, y: 20, w: 40, h: 30 });
+  });
+  it('makes squares on request', () => {
+    expect(rectFrom({ x: 0, y: 0 }, { x: 40, y: 10 }, true)).toEqual({ x: 0, y: 0, w: 40, h: 40 });
+  });
+  it('snaps lines to 45 degree steps', () => {
+    const p = snap45({ x: 0, y: 0 }, { x: 100, y: 10 });
+    expect(p.y).toBeCloseTo(0);
+    expect(p.x).toBeCloseTo(Math.hypot(100, 10));
+  });
+});

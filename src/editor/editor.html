@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Snapmark Editor</title><link rel="stylesheet" href="./editor.css"></head>
+<body>
+  <div id="app">
+    <aside id="tools"></aside>
+    <div id="main">
+      <header id="topbar">
+        <button id="undo" class="icon" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3"/></svg></button>
+        <button id="redo" class="icon" title="Redo (Ctrl+Shift+Z)"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3"/></svg></button>
+        <span class="sep"></span>
+        <button id="zoomOut" class="icon" title="Zoom out">−</button>
+        <button id="zoomLabel" class="zoom" title="Fit to window">100%</button>
+        <button id="zoomIn" class="icon" title="Zoom in">+</button>
+        <button id="zoom100" class="txt" title="Actual size">1:1</button>
+        <span class="sep"></span>
+        <button id="clear" class="txt" title="Remove all annotations">Clear</button>
+        <button id="history" class="txt" title="Open saved captures">History</button>
+        <span class="grow"></span>
+        <select id="format" title="File format">
+          <option value="png">PNG</option>
+          <option value="jpeg">JPG</option>
+        </select>
+        <label id="qualityWrap" hidden>Quality <input id="quality" type="range" min="40" max="100" value="92"></label>
+        <button id="copy" class="btn">Copy</button>
+        <button id="download" class="btn primary">Download</button>
+      </header>
+      <div id="options"></div>
+      <div id="workspace"><div id="stageWrap"><div id="stage"></div></div></div>
+      <footer id="status"><span id="size"></span><span class="grow"></span><span id="tip"></span></footer>
+    </div>
+  </div>
+  <div id="toast" hidden></div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
