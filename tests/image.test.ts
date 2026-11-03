@@ -39,3 +39,28 @@ describe('geometry', () => {
     expect(p.x).toBeCloseTo(Math.hypot(100, 10));
   });
 });
+
+import { arrowPolygon } from '../src/editor/geometry';
+
+describe('arrowPolygon', () => {
+  it('ends in a point exactly at the target', () => {
+    const poly = arrowPolygon([0, 0, 200, 0], 4);
+    expect(poly[3]).toEqual({ x: 200, y: 0 });
+  });
+  it('is thin at the tail and widest at the head', () => {
+    const poly = arrowPolygon([0, 0, 200, 0], 4);
+    const tail = Math.abs(poly[0].y), body = Math.abs(poly[1].y), head = Math.abs(poly[2].y);
+    expect(tail).toBeLessThan(body);
+    expect(body).toBeLessThan(head);
+  });
+  it('grows with length and with the Size option', () => {
+    const w = (pts: number[], size = 4) => Math.abs(arrowPolygon(pts, size)[2].y);
+    expect(w([0, 0, 400, 0])).toBeGreaterThan(w([0, 0, 100, 0]));
+    expect(w([0, 0, 200, 0], 8)).toBeGreaterThan(w([0, 0, 200, 0], 4));
+  });
+  it('keeps the head inside very short arrows and ignores zero length', () => {
+    expect(arrowPolygon([5, 5, 5, 5], 4)).toEqual([]);
+    const poly = arrowPolygon([0, 0, 20, 0], 4);
+    expect(Math.min(...poly.map((p) => p.x))).toBeGreaterThanOrEqual(-0.001);
+  });
+});

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { kindOf, newBlur, newSpotlight, styleOf, type View } from './nodes';
+import { attachArrowShape, kindOf, newBlur, newSpotlight, styleOf, type View } from './nodes';
 
 interface Ctx {
   base: () => HTMLCanvasElement;
@@ -20,5 +20,6 @@ export function deserialize(str: string, ctx: Ctx): Konva.Node {
   if (o.kind === 'spotlight') return newSpotlight({ x: o.x, y: o.y, w: o.w, h: o.h }, o.style, ctx.view);
   const node = Konva.Node.create(o.json);
   node.draggable(true);
+  if (kindOf(node) === 'arrow') attachArrowShape(node as Konva.Line);
   return node;
 }

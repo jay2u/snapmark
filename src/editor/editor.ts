@@ -193,6 +193,8 @@ export class Editor {
     this.tools[this.tool]?.cancel?.();
     this.tool = t;
     this.annLayer.listening(t === 'select');
+    // Konva skips the hit graph while a layer isn't listening; rebuild it so items are clickable.
+    this.annLayer.draw();
     this.stage.container().style.cursor = t === 'select' ? 'default' : 'crosshair';
     if (t !== 'select') this.clearSelection();
     this.emit();
