@@ -1,7 +1,14 @@
 import { createCapture } from '../shared/db';
-import { cropBlob, dataUrlToBlob, makeThumb, scrollPositions, stitchSlices, type Slice } from '../shared/image';
+import { MAX_CAPTURE_CSS_HEIGHT, Stitcher, cropBlob, dataUrlToBlob, makeThumb, nextScrollY } from '../shared/image';
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Fail loudly instead of hanging forever if the page or browser never answers. */
+function withTimeout<T>(p: Promise<T>, ms: number, what: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, rej) => { timer = setTimeout(() => rej(new Error(`${what} timed out`)), ms); });
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
+}
 
 // Chrome allows ~2 captureVisibleTab calls per second.
 const CAPTURE_GAP_MS = 600;
@@ -64,24 +71,39 @@ export async function captureRegion(tab: chrome.tabs.Tab, rect: { x: number; y: 
 export async function captureFullPage(tab: chrome.tabs.Tab, progress: (done: number, total: number) => void) {
   const tabId = tab.id!;
   await chrome.scripting.executeScript({ target: { tabId }, files: ['scroller.js'] });
-  const [m] = await runInTab(tabId, () => (window as any).__snapmark.measure());
-  const ys = scrollPositions(m.pageHeight, m.viewportHeight);
-  const slices: Slice[] = [];
-  let pxPerCss = 1;
+  const call = <T>(fn: (...a: any[]) => any, args: any[] = [], what = 'Page') =>
+    withTimeout(runInTab<T>(tabId, fn, args), 15_000, what).then((r) => r[0]);
+
+  const m = await call<{ pageHeight: number; viewportWidth: number; rect: { x: number; y: number; w: number; h: number } }>(
+    () => (window as any).__snapmark.measure(),
+  );
+  const step = Math.max(1, m.rect.h);
+  let stitcher: Stitcher | undefined;
+  let total = m.pageHeight;
+  let y = 0;
+  let prev = -1;
   try {
-    for (let i = 0; i < ys.length; i++) {
-      progress(i, ys.length);
-      const [actual] = await runInTab<number>(tabId, (y: number) => (window as any).__snapmark.scrollTo(y), [ys[i]]);
-      await sleep(150); // allow lazy content and sticky headers to settle
-      const bitmap = await createImageBitmap(await grabVisible(tab.windowId));
-      pxPerCss = bitmap.width / m.viewportWidth;
-      slices.push({ bitmap, scrollY: actual });
-      if (i === 0 && ys.length > 1) await runInTab(tabId, () => (window as any).__snapmark.hideFixed());
+    for (let i = 0; ; i++) {
+      progress(i, Math.ceil(Math.min(total, MAX_CAPTURE_CSS_HEIGHT) / step));
+      const actual = await call<number>((to: number) => (window as any).__snapmark.scrollTo(to), [y], 'Scrolling');
+      if (i > 0 && actual <= prev) break; // the page refused to scroll further
+      prev = actual;
+      await sleep(120); // let lazy content and sticky headers settle
+      const bitmap = await createImageBitmap(await withTimeout(grabVisible(tab.windowId), 20_000, 'Capture'));
+      const pxPerCss = bitmap.width / m.viewportWidth;
+      stitcher ??= new Stitcher(Math.round(m.rect.w * pxPerCss), Math.min(total, MAX_CAPTURE_CSS_HEIGHT), pxPerCss);
+      stitcher.add(bitmap, m.rect, actual);
+      if (i === 0) await call(() => (window as any).__snapmark.hideFixed());
+      total = await call<number>(() => (window as any).__snapmark.height());
+      stitcher.ensureHeight(total);
+      const next = nextScrollY(actual, step, total);
+      if (next === null) break;
+      y = next;
     }
   } finally {
     await runInTab(tabId, () => (window as any).__snapmark.restore()).catch(() => {});
   }
-  const out = await stitchSlices(slices, pxPerCss, m.pageHeight, Math.round(m.scrollbarWidth * pxPerCss));
+  const out = await stitcher!.toBlob();
   await finish(tab, out.blob, out.width, out.height);
 }
 

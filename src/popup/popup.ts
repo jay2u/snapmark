@@ -2,6 +2,7 @@ import type { CaptureMode } from '../shared/messages';
 
 document.querySelectorAll<HTMLButtonElement>('button[data-mode]').forEach((b) =>
   b.addEventListener('click', async () => {
+    // The background replies immediately and keeps working; progress shows on the toolbar icon.
     await chrome.runtime.sendMessage({ type: 'capture', mode: b.dataset.mode as CaptureMode });
     window.close();
   }),

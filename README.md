@@ -21,5 +21,6 @@ Shortcuts (change at `chrome://extensions/shortcuts`): Alt+Shift+V visible, S se
 
 ## Known limits
 - `chrome://` pages and the Web Store can't be captured (window/desktop capture still works there).
-- Full-page capture scrolls the page itself; pages that scroll inside an inner container capture only the visible part.
-- Very tall pages are scaled down to stay under the browser's canvas size limit.
+- Full-page capture handles normal pages and apps that scroll inside a pane (it picks the largest scrolling area). Pages with several independent scrolling panes capture only the largest one.
+- Capture stops at 30,000 px of page height, and very large images are scaled down to stay under the browser's canvas limit.
+- Chrome allows about 2 captures per second, so long pages take a while; progress shows as a % on the toolbar icon, and a red ! (hover for the reason) means it failed.

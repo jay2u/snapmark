@@ -18,7 +18,11 @@ function setBadge(text: string, color = '#2563eb') {
 function fail(e: unknown) {
   console.error('Snapmark capture failed:', e);
   setBadge('!', '#dc2626');
-  setTimeout(() => setBadge(''), 4000);
+  chrome.action.setTitle({ title: `Snapmark: ${e instanceof Error ? e.message : e}` });
+  setTimeout(() => {
+    setBadge('');
+    chrome.action.setTitle({ title: 'Snapmark' });
+  }, 8000);
 }
 
 async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
@@ -33,8 +37,12 @@ async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
     if (!tab?.id) throw new Error('No active tab');
     if (mode === 'visible') await captureVisible(tab);
     else if (mode === 'full') {
-      await captureFullPage(tab, (d, t) => setBadge(`${Math.round(((d + 1) / t) * 100)}%`));
-      setBadge('');
+      setBadge('…');
+      try {
+        await captureFullPage(tab, (d, t) => setBadge(`${Math.min(99, Math.round((d / Math.max(t, 1)) * 100))}%`));
+      } finally {
+        setBadge('');
+      }
     } else if (mode === 'region') {
       pendingRegion.set(tab.id, tab);
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['selector.js'] });
@@ -49,8 +57,10 @@ async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
 
 chrome.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
   if (msg.type === 'capture') {
-    start(msg.mode).then(() => sendResponse({ ok: true }));
-    return true;
+    // Reply straight away so the popup can close; progress shows on the toolbar badge.
+    start(msg.mode);
+    sendResponse({ ok: true });
+    return false;
   }
   const tabId = sender.tab?.id;
   if (msg.type === 'region-cancelled' && tabId) pendingRegion.delete(tabId);

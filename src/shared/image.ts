@@ -29,15 +29,11 @@ export async function cropBlob(
   return { blob: await c.convertToBlob({ type: 'image/png' }), width: w, height: h };
 }
 
-export interface Slice {
-  bitmap: ImageBitmap;
-  /** Page scroll offset (CSS px) at which this slice was taken. */
-  scrollY: number;
-}
-
-// Browsers cap canvas size; stay safely below Chrome's limits.
+// Browsers cap canvas size; stay safely below Chrome's limits (and keep memory sane: 4 bytes/pixel).
 export const MAX_CANVAS_DIM = 32000;
-export const MAX_CANVAS_AREA = 250_000_000;
+export const MAX_CANVAS_AREA = 120_000_000;
+/** Stop full-page capture after this many CSS pixels of page height (infinite-scroll pages). */
+export const MAX_CAPTURE_CSS_HEIGHT = 30_000;
 
 /** Scale factor (<= 1) needed so a w x h canvas stays within browser limits. */
 export function limitScale(w: number, h: number): number {
@@ -45,29 +41,62 @@ export function limitScale(w: number, h: number): number {
 }
 
 /**
- * Stitch viewport slices into one tall image.
- * @param pxPerCss device pixels per CSS pixel (slice.width / viewport width)
- * @param pageHeight total page height in CSS px
- * @param cropRight device pixels to trim from the right of each slice (the scrollbar)
+ * Where to scroll for the next slice, or null when the page is covered.
+ * @param actual scroll position the last slice was taken at
+ * @param step visible height of one slice
+ * @param total current scrollable height
  */
-export async function stitchSlices(slices: Slice[], pxPerCss: number, pageHeight: number, cropRight = 0) {
-  const fullW = slices[0].bitmap.width - cropRight;
-  const fullH = Math.round(pageHeight * pxPerCss);
-  const k = limitScale(fullW, fullH);
-  const c = new OffscreenCanvas(Math.max(1, Math.round(fullW * k)), Math.max(1, Math.round(fullH * k)));
-  const ctx = c.getContext('2d')!;
-  for (const s of slices) {
-    const dy = Math.round(s.scrollY * pxPerCss * k);
-    ctx.drawImage(s.bitmap, 0, 0, fullW, s.bitmap.height, 0, dy, Math.round(fullW * k), Math.round(s.bitmap.height * k));
-  }
-  return { blob: await c.convertToBlob({ type: 'image/png' }), width: c.width, height: c.height };
+export function nextScrollY(actual: number, step: number, total: number, cap = MAX_CAPTURE_CSS_HEIGHT): number | null {
+  const next = actual + step;
+  if (next >= total || next >= cap) return null; // the slice at `actual` already reaches the end
+  return Math.min(next, total - step); // the final slice is clamped to the page end
 }
 
-/** Scroll offsets (CSS px) needed to cover a page; the last one is clamped to the page end. */
-export function scrollPositions(pageHeight: number, viewportHeight: number): number[] {
-  const max = Math.max(0, pageHeight - viewportHeight);
-  const ys: number[] = [];
-  for (let y = 0; y < max; y += viewportHeight) ys.push(y);
-  ys.push(max);
-  return ys;
+/**
+ * Builds one tall image from viewport slices, drawing each straight onto the canvas so only
+ * the result (not every slice) is held in memory.
+ */
+export class Stitcher {
+  private canvas: OffscreenCanvas;
+  readonly k: number; // output pixels per captured pixel (< 1 only for huge pages)
+  private heightCss = 0;
+
+  constructor(private widthPx: number, heightCss: number, private pxPerCss: number) {
+    this.k = limitScale(widthPx, Math.max(1, heightCss * pxPerCss));
+    this.canvas = new OffscreenCanvas(Math.max(1, Math.round(widthPx * this.k)), 1);
+    this.ensureHeight(heightCss);
+  }
+
+  get width() { return this.canvas.width; }
+  get height() { return this.canvas.height; }
+
+  /** Grow the canvas when the page got taller while capturing (lazy content). */
+  ensureHeight(heightCss: number) {
+    heightCss = Math.min(heightCss, MAX_CAPTURE_CSS_HEIGHT);
+    const maxH = Math.floor(Math.min(MAX_CANVAS_DIM, MAX_CANVAS_AREA / this.canvas.width));
+    const want = Math.min(maxH, Math.max(1, Math.round(heightCss * this.pxPerCss * this.k)));
+    if (want <= this.canvas.height && this.heightCss) return;
+    this.heightCss = heightCss;
+    if (want === this.canvas.height) return;
+    const next = new OffscreenCanvas(this.canvas.width, want);
+    next.getContext('2d')!.drawImage(this.canvas, 0, 0);
+    this.canvas = next;
+  }
+
+  /** Draw the `rect` part (CSS px, viewport coordinates) of a captured bitmap at page offset scrollY. */
+  add(bitmap: ImageBitmap, rect: { x: number; y: number; w: number; h: number }, scrollY: number) {
+    const p = this.pxPerCss;
+    const sx = Math.round(rect.x * p), sy = Math.round(rect.y * p);
+    const sw = Math.min(bitmap.width - sx, Math.round(rect.w * p)), sh = Math.min(bitmap.height - sy, Math.round(rect.h * p));
+    const dy = Math.round(scrollY * p * this.k);
+    this.canvas.getContext('2d')!.drawImage(
+      bitmap, sx, sy, sw, sh,
+      0, dy, Math.round(sw * this.k), Math.ceil(sh * this.k) + 1, // +1px overlap hides rounding seams
+    );
+    bitmap.close();
+  }
+
+  async toBlob() {
+    return { blob: await this.canvas.convertToBlob({ type: 'image/png' }), width: this.canvas.width, height: this.canvas.height };
+  }
 }

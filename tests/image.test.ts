@@ -1,16 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { limitScale, scrollPositions } from '../src/shared/image';
+import { MAX_CANVAS_AREA, limitScale, nextScrollY } from '../src/shared/image';
 import { rectFrom, snap45 } from '../src/editor/geometry';
 
-describe('scrollPositions', () => {
-  it('covers a page exactly with the last slice clamped to the end', () => {
-    expect(scrollPositions(2500, 1000)).toEqual([0, 1000, 1500]);
+describe('nextScrollY', () => {
+  it('steps one viewport at a time and clamps the last slice to the page end', () => {
+    expect(nextScrollY(0, 1000, 2500)).toBe(1000);
+    expect(nextScrollY(1000, 1000, 2500)).toBe(1500);
+    expect(nextScrollY(1500, 1000, 2500)).toBeNull();
   });
-  it('uses a single slice when the page fits the viewport', () => {
-    expect(scrollPositions(800, 1000)).toEqual([0]);
+  it('is done after one slice when the page fits', () => {
+    expect(nextScrollY(0, 1000, 800)).toBeNull();
   });
-  it('has no duplicate when the page is an exact multiple', () => {
-    expect(scrollPositions(3000, 1000)).toEqual([0, 1000, 2000]);
+  it('finishes on an exact multiple without a duplicate slice', () => {
+    expect(nextScrollY(2000, 1000, 3000)).toBeNull();
+  });
+  it('stops at the height cap for endless pages', () => {
+    expect(nextScrollY(29_500, 1000, 1_000_000)).toBeNull();
+    expect(nextScrollY(1000, 1000, 1_000_000)).toBe(2000);
   });
 });
 
@@ -22,7 +28,7 @@ describe('limitScale', () => {
   });
   it('shrinks images over the area cap', () => {
     const k = limitScale(30_000, 30_000);
-    expect(30_000 * 30_000 * k * k).toBeLessThanOrEqual(250_000_000 + 1);
+    expect(30_000 * 30_000 * k * k).toBeLessThanOrEqual(MAX_CANVAS_AREA + 1);
   });
 });
 
