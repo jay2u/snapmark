@@ -24,6 +24,11 @@ chrome.storage.local.get('lastError').then((stored) => {
   document.getElementById('errMsg')!.textContent = lastError.message;
   document.getElementById('errDetail')!.textContent = lastError.detail;
   document.getElementById('error')!.hidden = false;
+  const copy = document.getElementById('errCopy') as HTMLButtonElement;
+  copy.onclick = async () => {
+    await navigator.clipboard.writeText(`Snapmark ${lastError.what} failed\n${lastError.detail}`);
+    copy.textContent = 'Copied';
+  };
 });
 
 chrome.storage.local.get('lastNotice').then((stored) => {

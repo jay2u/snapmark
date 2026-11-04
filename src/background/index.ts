@@ -1,6 +1,6 @@
 import { MODE_LABELS, type CaptureMode, type Message } from '../shared/messages';
 import { describeError } from '../shared/errors';
-import { captureFullPage, captureRegion, captureVisible, openEditor } from './capture';
+import { captureFullPage, captureRegion, captureVisible, getStage, openEditor } from './capture';
 
 let busy = false;
 // tabId -> pending region capture waiting for the content script's answer
@@ -16,13 +16,18 @@ function setBadge(text: string, color = '#2563eb') {
   chrome.action.setBadgeText({ text });
 }
 
-function fail(e: unknown, what = 'Capture') {
+async function fail(e: unknown, what = 'Capture', tab?: chrome.tabs.Tab) {
   const err = describeError(e);
   console.error(`Snapmark ${what} failed:`, e);
   setBadge('!', '#dc2626');
   chrome.action.setTitle({ title: `Snapmark: ${err.message}` });
-  // Shown in the popup next time it opens (see popup.ts).
-  chrome.storage.local.set({ lastError: { ...err, what, at: Date.now() } }).catch(() => {});
+  // Everything needed to diagnose the failure, shown in the popup (see popup.ts).
+  let access = 'unknown';
+  if (tab?.url) {
+    try { access = String(await chrome.permissions.contains({ origins: [new URL(tab.url).origin + '/*'] })); } catch { /* not a web URL */ }
+  }
+  const detail = [`step: ${getStage()}`, `page: ${tab?.url ?? 'unknown'}`, `site access granted: ${access}`, `error: ${err.detail}`, `version: ${chrome.runtime.getManifest().version}`].join('\n');
+  chrome.storage.local.set({ lastError: { message: err.message, detail, what, at: Date.now() } }).catch(() => {});
   setTimeout(() => {
     setBadge('');
     chrome.action.setTitle({ title: 'Snapmark' });
@@ -59,7 +64,7 @@ async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
     }
   } catch (e) {
     if (tab?.id) pendingRegion.delete(tab.id);
-    fail(e, MODE_LABELS[mode]);
+    fail(e, MODE_LABELS[mode], tab);
   } finally {
     busy = false;
   }
@@ -77,7 +82,7 @@ chrome.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
   if (msg.type === 'region-selected' && tabId) {
     const tab = pendingRegion.get(tabId);
     pendingRegion.delete(tabId);
-    if (tab) captureRegion(tab, msg.rect).catch((e) => fail(e, MODE_LABELS.region));
+    if (tab) captureRegion(tab, msg.rect).catch((e) => fail(e, MODE_LABELS.region, tab));
   }
   if (msg.type === 'desktop-captured') openEditor(msg.id).catch((e) => fail(e, MODE_LABELS.desktop));
 });
