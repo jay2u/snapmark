@@ -1,6 +1,6 @@
 import { MODE_LABELS, type CaptureMode, type Message } from '../shared/messages';
 import { describeError } from '../shared/errors';
-import { captureFullPage, captureRegion, captureVisible, getStage, openEditor } from './capture';
+import { at, captureFullPage, captureRegion, captureVisible, getStage, openEditor } from './capture';
 
 let busy = false;
 // tabId -> pending region capture waiting for the content script's answer
@@ -37,6 +37,7 @@ async function fail(e: unknown, what = 'Capture', tab?: chrome.tabs.Tab) {
 async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
   if (busy) return;
   busy = true;
+  at('start');
   chrome.storage.local.remove(['lastError', 'lastNotice']).catch(() => {});
   try {
     if (mode === 'desktop') {
@@ -60,6 +61,7 @@ async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
       }
     } else if (mode === 'region') {
       pendingRegion.set(tab.id, tab);
+      at('inject selector');
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['selector.js'] });
     }
   } catch (e) {

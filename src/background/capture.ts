@@ -5,7 +5,7 @@ import { MAX_CAPTURE_CSS_HEIGHT, Stitcher, cropBlob, dataUrlToBlob, makeThumb, n
 /** Which step is running, so failures can say where they happened. */
 let stage = 'start';
 export const getStage = () => stage;
-const at = (name: string) => { stage = name; };
+export const at = (name: string) => { stage = name; };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

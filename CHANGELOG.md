@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Dropped the `<all_urls>` host permission; `activeTab` alone is enough, so Chrome no longer shows a broad-access warning.
+- Capture errors now report the correct step.
+
 ## [1.0.0] - 2026-11-04
 
 First release.

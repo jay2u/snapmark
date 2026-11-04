@@ -12,7 +12,6 @@ export default {
   },
   background: { service_worker: 'background.js', type: 'module' },
   permissions: ['activeTab', 'scripting', 'storage', 'unlimitedStorage', 'contextMenus', 'clipboardWrite'],
-  host_permissions: ['<all_urls>'],
   commands: {
     'capture-visible': {
       suggested_key: { default: 'Alt+Shift+V' },

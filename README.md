@@ -124,7 +124,7 @@ annotations are stored only in your browser and can be deleted from the History 
 
 | Permission | Why it is needed |
 |---|---|
-| `activeTab`, host access (`<all_urls>`) | Take a screenshot of the tab you choose, and scroll it for full-page capture. Nothing is read until you start a capture. |
+| `activeTab` | Temporary access to the tab you are on, granted by Chrome only when you click the icon, use a shortcut or the right-click menu. Used to screenshot it and scroll it for full-page capture. Snapmark has no standing access to any site. |
 | `scripting` | Inject the region selector and the scroller into the page you are capturing. |
 | `storage`, `unlimitedStorage` | Save settings, and keep your capture history locally (screenshots can be large). |
 | `contextMenus` | The right-click "Snapmark" menu. |
