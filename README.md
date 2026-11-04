@@ -10,6 +10,7 @@ Free, open source, and 100% local: nothing ever leaves your browser.
 [![CI](https://github.com/jay2u/snapmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jay2u/snapmark/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-available-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/search/snapmark)
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Built with Vite](https://img.shields.io/badge/built%20with-Vite-646CFF?logo=vite&logoColor=white)](https://vite.dev)
@@ -54,7 +55,13 @@ drag arrow ends and bends; duplicate, reorder, delete. Full **undo / redo**, zoo
 
 ## Install
 
-Snapmark is not on the Chrome Web Store yet, so install it from source:
+### From the Chrome Web Store
+
+Install Snapmark from the [Chrome Web Store](https://chromewebstore.google.com/search/snapmark) and pin it to the toolbar (puzzle-piece icon → pin).
+
+### From source
+
+To build it yourself or try the latest changes:
 
 ```bash
 git clone https://github.com/jay2u/snapmark.git
