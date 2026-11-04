@@ -46,7 +46,7 @@ describe('geometry', () => {
   });
 });
 
-import { arrowPolygon } from '../src/editor/geometry';
+import { arrowPolygon, curvedArrowPolygon } from '../src/editor/geometry';
 
 describe('arrowPolygon', () => {
   it('ends in a point exactly at the target', () => {
@@ -68,5 +68,33 @@ describe('arrowPolygon', () => {
     expect(arrowPolygon([5, 5, 5, 5], 4)).toEqual([]);
     const poly = arrowPolygon([0, 0, 20, 0], 4);
     expect(Math.min(...poly.map((p) => p.x))).toBeGreaterThanOrEqual(-0.001);
+  });
+});
+
+describe('curvedArrowPolygon', () => {
+  const pts = [0, 0, 100, -60, 200, 0]; // bulges upward through (100, -60)
+  it('ends in a point at the target', () => {
+    const poly = curvedArrowPolygon(pts, 4);
+    expect(poly).toContainEqual({ x: 200, y: 0 });
+  });
+  it('follows the bend: passes through the middle handle', () => {
+    const poly = curvedArrowPolygon(pts, 4);
+    const nearest = Math.min(...poly.map((p) => Math.hypot(p.x - 100, p.y + 60)));
+    expect(nearest).toBeLessThan(8); // within the body half-width of the handle
+  });
+  it('is thin at the tail and wider further along', () => {
+    const poly = curvedArrowPolygon(pts, 4);
+    const half = poly.length;
+    const gap = (i: number) => Math.hypot(poly[i].x - poly[half - 1 - i].x, poly[i].y - poly[half - 1 - i].y);
+    expect(gap(0)).toBeLessThan(gap(5));
+  });
+  it('grows with length', () => {
+    const big = curvedArrowPolygon([0, 0, 200, -120, 400, 0], 4);
+    const small = curvedArrowPolygon([0, 0, 50, -30, 100, 0], 4);
+    const spread = (poly: { x: number; y: number }[]) => Math.max(...poly.map((p) => p.y)) - Math.min(...poly.map((p) => p.y));
+    expect(spread(big)).toBeGreaterThan(spread(small) * 2);
+  });
+  it('handles a degenerate arrow', () => {
+    expect(curvedArrowPolygon([5, 5, 5, 5, 5, 5], 4)).toEqual([]);
   });
 });

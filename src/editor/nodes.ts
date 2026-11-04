@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { arrowPolygon } from './geometry';
+import { arrowPolygon, curvedArrowPolygon } from './geometry';
 import type { Kind, Rect, Style, Vec } from './types';
 
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
@@ -31,18 +31,11 @@ export function paint(node: Konva.Node, s: Style) {
   node.setAttr('snapStyle', s);
   switch (kind) {
     case 'arrow':
+    case 'curve':
       // Tapered shape; Size scales it. A thin same-colour outline softens the corners.
       node.setAttrs({ fill: s.color, stroke: s.color, strokeWidth: 1.5, opacity: s.opacity });
       setShadow(node, s.shadow);
       break;
-    case 'curve': {
-      const a = node as Konva.Arrow;
-      const length = 12 + s.width * 3;
-      const headWidth = 14 + s.width * 4.5;
-      a.setAttrs({ stroke: s.color, fill: s.color, strokeWidth: s.width, pointerLength: length, pointerWidth: headWidth, opacity: s.opacity, hitStrokeWidth: Math.max(14, s.width) });
-      setShadow(a, s.shadow);
-      break;
-    }
     case 'line':
     case 'pen':
     case 'highlighter':
@@ -104,10 +97,12 @@ function init<T extends Konva.Node>(node: T, kind: Kind, s: Style): T {
   return node;
 }
 
-/** Draw a line node as a tapered arrow (functions can't be serialized, so this is re-applied on load). */
+/** Draw a line node (arrow or curve) as a tapered arrow (functions can't be serialized, so this is re-applied on load). */
 export function attachArrowShape(node: Konva.Line) {
   const trace = (ctx: Konva.Context, shape: Konva.Shape) => {
-    const poly = arrowPolygon((shape as Konva.Line).points(), styleOf(shape).width);
+    const pts = (shape as Konva.Line).points();
+    const width = styleOf(shape).width;
+    const poly = kindOf(shape) === 'curve' ? curvedArrowPolygon(pts, width) : arrowPolygon(pts, width);
     if (!poly.length) return;
     ctx.beginPath();
     ctx.moveTo(poly[0].x, poly[0].y);
@@ -123,8 +118,7 @@ export function attachArrowShape(node: Konva.Line) {
 export function newLine(kind: 'arrow' | 'curve' | 'line', pts: number[], s: Style) {
   const common: Konva.LineConfig = { points: pts, lineCap: 'round', lineJoin: 'round', strokeScaleEnabled: false };
   if (kind === 'line') return init(new Konva.Line(common), kind, s);
-  if (kind === 'arrow') return init(attachArrowShape(new Konva.Line(common)), kind, s);
-  return init(new Konva.Arrow({ ...common, tension: 0.5 }), kind, s);
+  return init(attachArrowShape(new Konva.Line(common)), kind, s);
 }
 
 export function newStroke(kind: 'pen' | 'highlighter', pts: number[], s: Style) {
