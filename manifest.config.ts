@@ -3,7 +3,7 @@ export default {
   name: 'Snapmark - Screenshot & Annotate',
   version: '1.0.0',
   description:
-    'Capture the visible area, a selection, a full scrolling page or any window, then annotate with arrows, highlights, text, blur and more.',
+    'Capture the visible area, a selection, a full page or any window, then annotate with arrows, highlights, text, blur and more.',
   icons: { 16: 'icons/16.png', 32: 'icons/32.png', 48: 'icons/48.png', 128: 'icons/128.png' },
   action: {
     default_title: 'Snapmark',
