@@ -25,3 +25,11 @@ chrome.storage.local.get('lastError').then((stored) => {
   document.getElementById('errDetail')!.textContent = lastError.detail;
   document.getElementById('error')!.hidden = false;
 });
+
+chrome.storage.local.get('lastNotice').then((stored) => {
+  const n = stored.lastNotice as { message: string; at: number } | undefined;
+  if (!n || Date.now() - n.at > 10 * 60_000) return;
+  const el = document.getElementById('notice')!;
+  el.textContent = n.message;
+  el.hidden = false;
+});

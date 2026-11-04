@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeError } from '../src/shared/errors';
+import { describeError, isAccessError } from '../src/shared/errors';
 
 describe('describeError', () => {
   it('explains blocked pages', () => {
@@ -15,5 +15,15 @@ describe('describeError', () => {
   });
   it('passes unknown errors through unchanged', () => {
     expect(describeError(new Error('boom'))).toEqual({ message: 'boom', detail: 'boom' });
+  });
+});
+
+describe('isAccessError', () => {
+  it('recognises blocked-page errors', () => {
+    expect(isAccessError(new Error('Cannot access a chrome:// URL'))).toBe(true);
+    expect(isAccessError(new Error('The extensions gallery cannot be scripted.'))).toBe(true);
+  });
+  it('ignores unrelated errors', () => {
+    expect(isAccessError(new Error('Scrolling timed out'))).toBe(false);
   });
 });

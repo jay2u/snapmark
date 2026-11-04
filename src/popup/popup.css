@@ -16,3 +16,4 @@ footer a:hover { color: var(--text); }
 .error p { margin: 4px 0; line-height: 1.4; }
 .error summary { cursor: pointer; color: #fca5a5; }
 .error code { display: block; margin-top: 4px; word-break: break-word; color: #fca5a5; font: 11px ui-monospace, monospace; user-select: all; }
+.notice { margin: 8px 8px 0; padding: 10px 12px; border: 1px solid #1e3a8a; background: #131c33; border-radius: 8px; color: #bfdbfe; font-size: 12px; line-height: 1.4; }

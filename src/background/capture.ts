@@ -1,4 +1,5 @@
 import { createCapture } from '../shared/db';
+import { isAccessError } from '../shared/errors';
 import { MAX_CAPTURE_CSS_HEIGHT, Stitcher, cropBlob, dataUrlToBlob, makeThumb, nextScrollY } from '../shared/image';
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -68,15 +69,27 @@ export async function captureRegion(tab: chrome.tabs.Tab, rect: { x: number; y: 
   await finish(tab, out.blob, out.width, out.height);
 }
 
-export async function captureFullPage(tab: chrome.tabs.Tab, progress: (done: number, total: number) => void) {
+/**
+ * @returns 'visible-only' when the page can't be scripted (browser pages, New Tab, Web Store),
+ *          in which case just the visible area was captured.
+ */
+export async function captureFullPage(
+  tab: chrome.tabs.Tab,
+  progress: (done: number, total: number) => void,
+): Promise<'full' | 'visible-only'> {
   const tabId = tab.id!;
-  await chrome.scripting.executeScript({ target: { tabId }, files: ['scroller.js'] });
   const call = <T>(fn: (...a: any[]) => any, args: any[] = [], what = 'Page') =>
     withTimeout(runInTab<T>(tabId, fn, args), 15_000, what).then((r) => r[0]);
 
-  const m = await call<{ pageHeight: number; viewportWidth: number; rect: { x: number; y: number; w: number; h: number } }>(
-    () => (window as any).__snapmark.measure(),
-  );
+  let m: { pageHeight: number; viewportWidth: number; rect: { x: number; y: number; w: number; h: number } };
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['scroller.js'] });
+    m = await call(() => (window as any).__snapmark.measure());
+  } catch (e) {
+    if (!isAccessError(e)) throw e;
+    await captureVisible(tab); // can't scroll this page, but we can still grab what's on screen
+    return 'visible-only';
+  }
   const step = Math.max(1, m.rect.h);
   let stitcher: Stitcher | undefined;
   let total = m.pageHeight;
@@ -105,6 +118,7 @@ export async function captureFullPage(tab: chrome.tabs.Tab, progress: (done: num
   }
   const out = await stitcher!.toBlob();
   await finish(tab, out.blob, out.width, out.height);
+  return 'full';
 }
 
 async function runInTab<T = any>(tabId: number, func: (...a: any[]) => any, args: any[] = []): Promise<T[]> {

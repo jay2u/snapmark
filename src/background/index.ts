@@ -32,7 +32,7 @@ function fail(e: unknown, what = 'Capture') {
 async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
   if (busy) return;
   busy = true;
-  chrome.storage.local.remove('lastError').catch(() => {});
+  chrome.storage.local.remove(['lastError', 'lastNotice']).catch(() => {});
   try {
     if (mode === 'desktop') {
       await chrome.tabs.create({ url: chrome.runtime.getURL('src/desktop/desktop.html') });
@@ -44,7 +44,12 @@ async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
     else if (mode === 'full') {
       setBadge('…');
       try {
-        await captureFullPage(tab, (d, t) => setBadge(`${Math.min(99, Math.round((d / Math.max(t, 1)) * 100))}%`));
+        const result = await captureFullPage(tab, (d, t) => setBadge(`${Math.min(99, Math.round((d / Math.max(t, 1)) * 100))}%`));
+        if (result === 'visible-only') {
+          chrome.storage.local.set({
+            lastNotice: { message: "This page can't be scrolled by extensions (browser pages, New Tab, Web Store), so only the visible area was captured.", at: Date.now() },
+          });
+        }
       } finally {
         setBadge('');
       }

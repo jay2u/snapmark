@@ -5,12 +5,21 @@ export interface FriendlyError {
   detail: string;
 }
 
+/** True when the browser refuses to let the extension read or script a page. */
+export function isAccessError(e: unknown): boolean {
+  const d = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  return (
+    d.includes('cannot access contents') || d.includes('must request permission') || d.includes('cannot access a chrome') ||
+    d.includes('cannot be scripted') || d.includes('extensions gallery') || d.includes('cannot access')
+  );
+}
+
 /** Turn browser/extension errors into something a person can act on. */
 export function describeError(e: unknown): FriendlyError {
   const detail = e instanceof Error ? e.message : String(e);
   const d = detail.toLowerCase();
   let message = detail;
-  if (d.includes('cannot access contents') || d.includes('must request permission') || d.includes('cannot access a chrome') || d.includes('cannot be scripted') || d.includes('extensions gallery')) {
+  if (isAccessError(e)) {
     message =
       "Snapmark isn't allowed to read this page. Browser pages (chrome://), the Chrome Web Store and PDFs are off-limits, and local files need \"Allow access to file URLs\" turned on in the extension's details.";
   } else if (d.includes('max_capture_visible_tab_calls')) {
