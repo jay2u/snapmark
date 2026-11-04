@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "description": "Chrome extension to capture screenshots (visible area, region, full page, any window) and annotate them.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jay2u/snapmark.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jay2u/snapmark/issues"
+  },
+  "homepage": "https://github.com/jay2u/snapmark#readme",
   "keywords": [
     "chrome-extension",
     "screenshot",

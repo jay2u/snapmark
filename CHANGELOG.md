@@ -29,3 +29,6 @@ First release.
 - **Triggers:** toolbar popup, keyboard shortcuts (Alt+Shift+V / S / F / D), right-click menu.
 - **Clear failure messages:** the popup explains why a capture failed, with a Copy details button.
 - Documentation, MIT license, privacy policy, unit tests and a CI workflow.
+
+[Unreleased]: https://github.com/jay2u/snapmark/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/jay2u/snapmark/releases/tag/v1.0.0

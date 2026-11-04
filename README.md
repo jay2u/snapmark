@@ -7,6 +7,7 @@
 **Capture any page or window, then mark it up with arrows, highlights, blur and more.**
 Free, open source, and 100% local: nothing ever leaves your browser.
 
+[![CI](https://github.com/jay2u/snapmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jay2u/snapmark/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
@@ -56,7 +57,7 @@ drag arrow ends and bends; duplicate, reorder, delete. Full **undo / redo**, zoo
 Snapmark is not on the Chrome Web Store yet, so install it from source:
 
 ```bash
-git clone <this repository>
+git clone https://github.com/jay2u/snapmark.git
 cd snapmark
 npm install
 npm run build
@@ -159,7 +160,7 @@ tests/                   Unit tests for the logic that doesn't need a browser
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Please read the
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md), or [open an issue](https://github.com/jay2u/snapmark/issues). Please read the
 [changelog](CHANGELOG.md) for what changed between versions.
 
 ## License
