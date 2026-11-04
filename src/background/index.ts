@@ -1,4 +1,5 @@
 import { MODE_LABELS, type CaptureMode, type Message } from '../shared/messages';
+import { describeError } from '../shared/errors';
 import { captureFullPage, captureRegion, captureVisible, openEditor } from './capture';
 
 let busy = false;
@@ -15,19 +16,23 @@ function setBadge(text: string, color = '#2563eb') {
   chrome.action.setBadgeText({ text });
 }
 
-function fail(e: unknown) {
-  console.error('Snapmark capture failed:', e);
+function fail(e: unknown, what = 'Capture') {
+  const err = describeError(e);
+  console.error(`Snapmark ${what} failed:`, e);
   setBadge('!', '#dc2626');
-  chrome.action.setTitle({ title: `Snapmark: ${e instanceof Error ? e.message : e}` });
+  chrome.action.setTitle({ title: `Snapmark: ${err.message}` });
+  // Shown in the popup next time it opens (see popup.ts).
+  chrome.storage.local.set({ lastError: { ...err, what, at: Date.now() } }).catch(() => {});
   setTimeout(() => {
     setBadge('');
     chrome.action.setTitle({ title: 'Snapmark' });
-  }, 8000);
+  }, 30_000);
 }
 
 async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
   if (busy) return;
   busy = true;
+  chrome.storage.local.remove('lastError').catch(() => {});
   try {
     if (mode === 'desktop') {
       await chrome.tabs.create({ url: chrome.runtime.getURL('src/desktop/desktop.html') });
@@ -49,7 +54,7 @@ async function start(mode: CaptureMode, tab?: chrome.tabs.Tab) {
     }
   } catch (e) {
     if (tab?.id) pendingRegion.delete(tab.id);
-    fail(`${MODE_LABELS[mode]}: ${e}`);
+    fail(e, MODE_LABELS[mode]);
   } finally {
     busy = false;
   }
@@ -67,9 +72,9 @@ chrome.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
   if (msg.type === 'region-selected' && tabId) {
     const tab = pendingRegion.get(tabId);
     pendingRegion.delete(tabId);
-    if (tab) captureRegion(tab, msg.rect).catch(fail);
+    if (tab) captureRegion(tab, msg.rect).catch((e) => fail(e, MODE_LABELS.region));
   }
-  if (msg.type === 'desktop-captured') openEditor(msg.id).catch(fail);
+  if (msg.type === 'desktop-captured') openEditor(msg.id).catch((e) => fail(e, MODE_LABELS.desktop));
 });
 
 chrome.commands.onCommand.addListener((command) => {
