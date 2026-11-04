@@ -10,7 +10,7 @@ Free, open source, and 100% local: nothing ever leaves your browser.
 [![CI](https://github.com/jay2u/snapmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jay2u/snapmark/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-available-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/search/snapmark)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-in%20review-orange?logo=googlechrome&logoColor=white)](#install)
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Built with Vite](https://img.shields.io/badge/built%20with-Vite-646CFF?logo=vite&logoColor=white)](https://vite.dev)
@@ -57,7 +57,7 @@ drag arrow ends and bends; duplicate, reorder, delete. Full **undo / redo**, zoo
 
 ### From the Chrome Web Store
 
-Install Snapmark from the [Chrome Web Store](https://chromewebstore.google.com/search/snapmark) and pin it to the toolbar (puzzle-piece icon → pin).
+Snapmark has been submitted to the Chrome Web Store and is awaiting review. Until it is listed, download `snapmark-1.0.0.zip` from the [latest release](https://github.com/jay2u/snapmark/releases/latest), unzip it, open `chrome://extensions`, switch on **Developer mode**, click **Load unpacked** and choose the unzipped folder.
 
 ### From source
 
