@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Region capture: after dragging, the selection stays adjustable. Move the box, drag any of its 8 handles, nudge it with the arrow keys (Shift = 10 px), or drag outside it to start over. Press Enter or click Capture to take the shot; Esc or Cancel aborts.
+
+### Fixed
+- Removed the stray scrollbar at the bottom of the editor's tool bar; tool buttons shrink on short windows so every tool stays visible.
+
 ## [1.0.0] - 2026-11-04
 
 First release. Uses only the `activeTab` permission for page access (no `<all_urls>` host permission).
