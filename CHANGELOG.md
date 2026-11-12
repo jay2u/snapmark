@@ -6,6 +6,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-12
 ### Changed
 - Region capture: after dragging, the selection stays adjustable. Move the box, drag any of its 8 handles, nudge it with the arrow keys (Shift = 10 px), or drag outside it to start over. Press Enter or click Capture to take the shot; Esc or Cancel aborts.
 
@@ -36,5 +37,6 @@ First release. Uses only the `activeTab` permission for page access (no `<all_ur
 - **Clear failure messages:** the popup explains why a capture failed, with a Copy details button.
 - Documentation, MIT license, privacy policy, unit tests and a CI workflow.
 
-[Unreleased]: https://github.com/jay2u/snapmark/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jay2u/snapmark/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/jay2u/snapmark/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jay2u/snapmark/releases/tag/v1.0.0

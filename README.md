@@ -9,7 +9,7 @@ Free, open source, and 100% local: nothing ever leaves your browser.
 
 [![CI](https://github.com/jay2u/snapmark/actions/workflows/ci.yml/badge.svg)](https://github.com/jay2u/snapmark/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](CHANGELOG.md)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-in%20review-orange?logo=googlechrome&logoColor=white)](#install)
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)

@@ -1,6 +1,6 @@
 {
   "name": "snapmark",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chrome extension to capture screenshots (visible area, region, full page, any window) and annotate them.",
   "license": "MIT",
   "repository": {
